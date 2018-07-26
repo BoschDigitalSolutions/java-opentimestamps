@@ -25,12 +25,9 @@ import java.util.logging.Logger;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by luca on 05/04/2017.
- */
 public class TestCalendar {
 
-    private static Logger log = Logger.getLogger(TestCalendar.class.getName());
+    private static Logger log = Utils.getLogger(TestCalendar.class.getName());
 
 
     @Test
@@ -44,17 +41,24 @@ public class TestCalendar {
     }
 
 
+
+
     @Test
     public void TestPrivate() throws Exception {
         byte[] digest = Utils.randBytes(32);
-        Path path = Paths.get("signature.key");
+
+        // key.wif it's a file of properties with the format
+        // <calendar url> = <private key in wif format>
+        // auth.calendar.eternitywall.com = KwT2r9sL........
+
+        Path path = Paths.get("key.wif");
         if(!Files.exists(path)){
             assertTrue(true);
             return;
         }
 
         Properties properties = new Properties();
-        properties.load(new FileInputStream("signature.key"));
+        properties.load(new FileInputStream("key.wif"));
         HashMap<String,String> privateUrls = new HashMap<>();
         for(String key : properties.stringPropertyNames()) {
             String value = properties.getProperty(key);
@@ -64,15 +68,15 @@ public class TestCalendar {
 
         for(Map.Entry<String, String> entry : privateUrls.entrySet()) {
             String calendarUrl = "https://"+entry.getKey();
-            String signature = entry.getValue();
+            String wifKey = entry.getValue();
 
             Calendar calendar = new Calendar(calendarUrl);
             ECKey key;
             try {
-                BigInteger privKey = new BigInteger(signature);
+                BigInteger privKey = new BigInteger(wifKey);
                 key = ECKey.fromPrivate(privKey);
             }catch (Exception e){
-                DumpedPrivateKey dumpedPrivateKey = new DumpedPrivateKey(NetworkParameters.prodNet(), signature);
+                DumpedPrivateKey dumpedPrivateKey = new DumpedPrivateKey(NetworkParameters.prodNet(), wifKey);
                 key = dumpedPrivateKey.getKey();
             }
             calendar.setKey(key);
@@ -86,14 +90,14 @@ public class TestCalendar {
     @Test
     public void TestPrivateWif() throws Exception {
         byte[] digest = Utils.randBytes(32);
-        Path path = Paths.get("signature.wif");
+        Path path = Paths.get("key.wif");
         if(!Files.exists(path)){
             assertTrue(true);
             return;
         }
 
         Properties properties = new Properties();
-        properties.load(new FileInputStream("signature.wif"));
+        properties.load(new FileInputStream("key.wif"));
         HashMap<String,String> privateUrls = new HashMap<>();
         for(String key : properties.stringPropertyNames()) {
             String value = properties.getProperty(key);
@@ -103,11 +107,11 @@ public class TestCalendar {
 
         for(Map.Entry<String, String> entry : privateUrls.entrySet()) {
             String calendarUrl = "https://"+entry.getKey();
-            String signature = entry.getValue();
+            String wifKey = entry.getValue();
 
             Calendar calendar = new Calendar(calendarUrl);
             ECKey key;
-            DumpedPrivateKey dumpedPrivateKey = new DumpedPrivateKey(NetworkParameters.prodNet(), signature);
+            DumpedPrivateKey dumpedPrivateKey = new DumpedPrivateKey(NetworkParameters.prodNet(), wifKey);
             key = dumpedPrivateKey.getKey();
             calendar.setKey(key);
             Timestamp timestamp = calendar.submit(digest);
@@ -274,5 +278,14 @@ public class TestCalendar {
         executor.shutdown();
     }
 
+
+    @Test
+    public void rfc6979() {
+        BigInteger privKey = new BigInteger("235236247357325473457345");
+        ECKey ecKey = ECKey.fromPrivate(privKey);
+        String a = ecKey.signMessage("a");
+        System.out.println(a);
+        assertTrue(a.equals("IBY7a75Ygps/o1BqTQ0OpFL+a8WHfd9jNO/8820ST0gyQ0SAuIWKm8/M90aG1G40oJvjrlcoiKngKAYYsJS6I0s="));
+    }
 
 }
