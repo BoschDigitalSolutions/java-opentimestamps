@@ -1,10 +1,10 @@
 package com.eternitywall.ots.op;
 
-import com.eternitywall.ots.StreamDeserializationContext;
-import com.eternitywall.ots.crypto.KeccakDigest;
-
 import java.util.logging.Logger;
+
+import com.eternitywall.ots.StreamDeserializationContext;
 import com.eternitywall.ots.Utils;
+import com.eternitywall.ots.crypto.KeccakDigest;
 
 /**
  * Cryptographic RIPEMD160 operation
@@ -18,7 +18,7 @@ public class OpKECCAK256 extends OpCrypto {
     private static Logger log = Utils.getLogger(OpKECCAK256.class.getName());
     private KeccakDigest digest = new KeccakDigest(256);
 
-    public static byte _TAG = (byte) 103;
+    public static final byte _TAG = (byte) 0x67;
 
     @Override
     public byte _TAG() {
@@ -32,7 +32,7 @@ public class OpKECCAK256 extends OpCrypto {
 
     @Override
     public String _HASHLIB_NAME() {
-        return "keccak256";
+        return "keccak-256";
     }
 
     @Override
