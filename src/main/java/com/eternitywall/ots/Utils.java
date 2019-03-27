@@ -1,14 +1,8 @@
 package com.eternitywall.ots;
 
-import java.io.IOException;
-import java.math.BigInteger;
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Logger;
-import org.bitcoinj.core.*;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -103,7 +97,11 @@ public class Utils {
     }
 
     public static byte[] toBytes(String str, String encode) {
-        return org.bitcoinj.core.Utils.toBytes(str, encode);
+        try {
+            return str.toString().getBytes(encode);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static String toUpperFirstLetter(String string){

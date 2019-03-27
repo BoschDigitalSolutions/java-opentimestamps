@@ -8,21 +8,24 @@ package com.eternitywall.ots;
  */
 
 
-import com.eternitywall.ots.attestation.BitcoinBlockHeaderAttestation;
-import com.eternitywall.ots.attestation.TimeAttestation;
-import com.eternitywall.ots.op.Op;
-import com.eternitywall.ots.attestation.*;
-import com.eternitywall.ots.op.OpAppend;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-
-import java.util.*;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Logger;
-import org.bitcoinj.core.Transaction;
+
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.*;
+import org.bitcoinj.core.Transaction;
 
 import com.eternitywall.ots.attestation.BitcoinBlockHeaderAttestation;
-import com.eternitywall.ots.attestation.PendingAttestation;
 import com.eternitywall.ots.attestation.TimeAttestation;
 import com.eternitywall.ots.op.Op;
 import com.eternitywall.ots.op.OpBinary;
@@ -124,13 +127,14 @@ public class Timestamp {
         // sort
         List<TimeAttestation> sortedAttestations = this.attestations;
         Collections.sort(sortedAttestations);
-        
+
         if (sortedAttestations.size() > 1) {
             for (int i = 0; i < sortedAttestations.size() - 1; i++) {
                 ctx.writeBytes(new byte[]{(byte) 0xff, (byte) 0x00});
                 sortedAttestations.get(i).serialize(ctx);
             }
         }
+        // Attestation Only
         if (this.ops.isEmpty()) {
             ctx.writeByte((byte) 0x00);
             if (!sortedAttestations.isEmpty()) {
@@ -370,7 +374,7 @@ public class Timestamp {
                 Timestamp timestamp = entry.getValue();
                 Op op = entry.getKey();
                 try {
-                    Transaction transaction = new Transaction(NetworkParameters.prodNet(), this.msg);
+                    new Transaction(NetworkParameters.fromID(NetworkParameters.ID_MAINNET), this.msg);
                     byte[] tx = Utils.arrayReverse(new OpSHA256().call(new OpSHA256().call(this.msg)));
                     builder.append(Timestamp.indention(indent) + "# Bitcoin transaction id " + Utils.bytesToHex(tx).toLowerCase() + "\n");
                 } catch (Exception err) {
@@ -389,7 +393,7 @@ public class Timestamp {
                 Timestamp timestamp = entry.getValue();
                 Op op = entry.getKey();
                 try {
-                    Transaction transaction = new Transaction(NetworkParameters.prodNet(), this.msg);
+                    new Transaction(NetworkParameters.fromID(NetworkParameters.ID_MAINNET), this.msg);
                     byte[] tx = Utils.arrayReverse(new OpSHA256().call(new OpSHA256().call(this.msg)));
                     builder.append(Timestamp.indention(indent) + "# Bitcoin transaction id " + Utils.bytesToHex(tx).toLowerCase() + "\n");
                 } catch (Exception err) {
@@ -406,7 +410,7 @@ public class Timestamp {
         return builder.toString();
     }
 
-    /** Set of al Attestations.
+    /** Set of all Attestations.
      * @return Array of all sub timestamps with attestations.
      */
     public List<Timestamp> directlyVerified() {
@@ -427,11 +431,11 @@ public class Timestamp {
         return list;
     }
 
-    /** Set of al Attestations.
+    /** Set of all Attestations.
      * @return Set of all timestamp attestations.
      */
     public Set<TimeAttestation> getAttestations() {
-        Set set = new HashSet<TimeAttestation>();
+        Set<TimeAttestation> set = new HashSet<>();
         for (Map.Entry<byte[], TimeAttestation> item : this.allAttestations().entrySet()) {
             //byte[] msg = item.getKey();
             TimeAttestation attestation = item.getValue();

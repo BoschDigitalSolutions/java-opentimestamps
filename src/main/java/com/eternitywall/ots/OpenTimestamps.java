@@ -1,23 +1,34 @@
 package com.eternitywall.ots;
 
-import com.eternitywall.ots.attestation.*;
-import com.eternitywall.ots.op.*;
-import com.eternitywall.ots.exceptions.*;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Logger;
+
 import org.bitcoinj.core.DumpedPrivateKey;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.Logger;
+import com.eternitywall.ots.attestation.BitcoinBlockHeaderAttestation;
+import com.eternitywall.ots.attestation.EthereumBlockHeaderAttestation;
+import com.eternitywall.ots.attestation.LitecoinBlockHeaderAttestation;
+import com.eternitywall.ots.attestation.PendingAttestation;
+import com.eternitywall.ots.attestation.TimeAttestation;
+import com.eternitywall.ots.exceptions.VerificationException;
+import com.eternitywall.ots.op.OpAppend;
+import com.eternitywall.ots.op.OpCrypto;
+import com.eternitywall.ots.op.OpSHA256;
 
 /**
  * com.eternitywall.ots.OpenTimestamps
@@ -110,7 +121,7 @@ public class OpenTimestamps {
      * @throws IOException if fileTimestamp is not valid, or the stamp procedure fails.
      */
     public static Timestamp stamp(DetachedTimestampFile fileTimestamp,  List<String> calendarsUrl, Integer m, HashMap<String,String> privateCalendarsUrl) throws IOException {
-        List<DetachedTimestampFile> fileTimestamps = new ArrayList<DetachedTimestampFile>();
+        List<DetachedTimestampFile> fileTimestamps = new ArrayList<>();
         fileTimestamps.add(fileTimestamp);
         return OpenTimestamps.stamp(fileTimestamps,calendarsUrl,m, privateCalendarsUrl);
     }
@@ -134,7 +145,7 @@ public class OpenTimestamps {
             privateCalendarsUrl = new HashMap<>();
         }
         if((calendarsUrl==null || calendarsUrl.size()==0) && (privateCalendarsUrl.size() == 0) ) {
-            calendarsUrl = new ArrayList<String>();
+            calendarsUrl = new ArrayList<>();
             calendarsUrl.add("https://alice.btc.calendar.opentimestamps.org");
             calendarsUrl.add("https://bob.btc.calendar.opentimestamps.org");
             calendarsUrl.add("https://finney.calendar.eternitywall.com");
@@ -192,7 +203,7 @@ public class OpenTimestamps {
         for(Map.Entry<String, String> entry : privateCalendarUrls.entrySet()) {
             String calendarUrl = "https://" + entry.getKey();
             String signature = entry.getValue();
-            log.info("Submitting to remote private calendar "+calendarUrl);
+            log.info("Submitting to remote private calendar " + calendarUrl);
             try {
                 CalendarAsyncSubmit task = new CalendarAsyncSubmit(calendarUrl, timestamp.msg);
                 ECKey key = null;
@@ -201,9 +212,9 @@ public class OpenTimestamps {
                     key = ECKey.fromPrivate(privKey);
                 }catch (Exception e){
                     try {
-                        DumpedPrivateKey dumpedPrivateKey = new DumpedPrivateKey(NetworkParameters.prodNet(), signature);
+                        DumpedPrivateKey dumpedPrivateKey = DumpedPrivateKey.fromBase58(NetworkParameters.fromID(NetworkParameters.ID_MAINNET), signature);
                         key = dumpedPrivateKey.getKey();
-                    }catch (Exception err){
+                    } catch (Exception err){
                         log.severe("Invalid private key");
                     }
                 }
