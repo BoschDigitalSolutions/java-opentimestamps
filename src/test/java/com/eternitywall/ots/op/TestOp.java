@@ -6,9 +6,12 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+
 import javax.xml.bind.DatatypeConverter;
-import org.bitcoinj.core.Utils;
+
 import org.junit.Test;
+
+import com.eternitywall.ots.Utils;
 
 
 public class TestOp {
