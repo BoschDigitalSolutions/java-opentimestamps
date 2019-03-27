@@ -1,29 +1,34 @@
 package com.eternitywall;
 
-import com.eternitywall.ots.*;
-import com.eternitywall.ots.Calendar;
-import com.eternitywall.ots.Optional;
-import org.bitcoinj.core.DumpedPrivateKey;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.NetworkParameters;
-import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.bitcoinj.core.DumpedPrivateKey;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.NetworkParameters;
+import org.junit.Test;
+
+import com.eternitywall.ots.Calendar;
+import com.eternitywall.ots.CalendarAsyncSubmit;
+import com.eternitywall.ots.Optional;
+import com.eternitywall.ots.Timestamp;
+import com.eternitywall.ots.Utils;
 
 public class TestCalendar {
 
@@ -76,7 +81,7 @@ public class TestCalendar {
                 BigInteger privKey = new BigInteger(wifKey);
                 key = ECKey.fromPrivate(privKey);
             }catch (Exception e){
-                DumpedPrivateKey dumpedPrivateKey = new DumpedPrivateKey(NetworkParameters.prodNet(), wifKey);
+                DumpedPrivateKey dumpedPrivateKey = DumpedPrivateKey.fromBase58(NetworkParameters.fromID(NetworkParameters.ID_MAINNET), wifKey);
                 key = dumpedPrivateKey.getKey();
             }
             calendar.setKey(key);
@@ -111,7 +116,7 @@ public class TestCalendar {
 
             Calendar calendar = new Calendar(calendarUrl);
             ECKey key;
-            DumpedPrivateKey dumpedPrivateKey = new DumpedPrivateKey(NetworkParameters.prodNet(), wifKey);
+            DumpedPrivateKey dumpedPrivateKey = DumpedPrivateKey.fromBase58(NetworkParameters.fromID(NetworkParameters.ID_MAINNET), wifKey);
             key = dumpedPrivateKey.getKey();
             calendar.setKey(key);
             Timestamp timestamp = calendar.submit(digest);
@@ -179,7 +184,7 @@ public class TestCalendar {
     @Test
     public void TestMulti() throws Exception {
 
-        List<String> calendarsUrl = new ArrayList<String>();
+        List<String> calendarsUrl = new ArrayList<>();
         calendarsUrl.add("https://alice.btc.calendar.opentimestamps.org");
         calendarsUrl.add("https://bob.btc.calendar.opentimestamps.org");
         calendarsUrl.add("https://finney.calendar.eternitywall.com");
@@ -231,7 +236,7 @@ public class TestCalendar {
     @Test
     public void TestMultiWithInvalidCalendar() throws Exception {
 
-        List<String> calendarsUrl = new ArrayList<String>();
+        List<String> calendarsUrl = new ArrayList<>();
         calendarsUrl.add("https://alice.btc.calendar.opentimestamps.org");
         calendarsUrl.add("https://bob.btc.calendar.opentimestamps.org");
         calendarsUrl.add("");
