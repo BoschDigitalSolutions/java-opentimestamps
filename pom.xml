@@ -6,7 +6,7 @@
 
     <groupId>com.eternitywall</groupId>
     <artifactId>java-opentimestamps</artifactId>
-    <version>1.19</version>
+    <version>1.20-SNAPSHOT</version>
 
     <name>java-opentimestamps</name>
     <description>The java implementation of the OpenTimestamps protocol</description>
@@ -75,7 +75,6 @@
             <groupId>org.bitcoinj</groupId>
             <artifactId>bitcoinj-core</artifactId>
             <version>0.14.7</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -103,7 +102,7 @@
                     <target>${java.specification.version}</target>
                 </configuration>
             </plugin>
-            <plugin>
+<!--            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.2.0</version>
@@ -131,7 +130,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -156,10 +155,10 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+<!--            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -176,7 +175,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>

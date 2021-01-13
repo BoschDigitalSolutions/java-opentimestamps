@@ -32,7 +32,7 @@ public class OpKECCAK256 extends OpCrypto {
 
     @Override
     public String _HASHLIB_NAME() {
-        return "keccak256";
+        return "keccak-256";
     }
 
     @Override
