@@ -5,13 +5,12 @@ import com.eternitywall.ots.StreamSerializationContext;
 import com.eternitywall.ots.Utils;
 
 import java.util.Arrays;
-
 import java.util.logging.Logger;
 
 /**
  * Operations that act on a message and a single argument.
  *
- * @see com.eternitywall.ots.op.OpUnary
+ * @see OpUnary
  */
 public abstract class OpBinary extends Op implements Comparable<Op> {
 
@@ -36,13 +35,14 @@ public abstract class OpBinary extends Op implements Comparable<Op> {
 
     public static Op deserializeFromTag(StreamDeserializationContext ctx, byte tag) {
         byte[] arg = ctx.readVarbytes(_MAX_RESULT_LENGTH, 1);
+
         if (tag == OpAppend._TAG) {
             return new OpAppend(arg);
         } else if (tag == OpPrepend._TAG) {
             return new OpPrepend(arg);
         } else {
-            log.severe("Unknown operation tag: " + tag  + " 0x" + String.format("%02x", tag));
-            return null;
+            log.severe("Unknown operation tag: " + tag + " 0x" + String.format("%02x", tag));
+            return null;     // TODO: Is this OK? Won't it blow up later? Better to throw?
         }
     }
 
@@ -57,17 +57,17 @@ public abstract class OpBinary extends Op implements Comparable<Op> {
         return this._TAG_NAME() + ' ' + Utils.bytesToHex(this.arg).toLowerCase();
     }
 
-
     @Override
     public int compareTo(Op o) {
-        if(o instanceof OpBinary && this._TAG()==o._TAG()) {
-            return Utils.compare(this.arg, ((OpBinary) o).arg );
+        if (o instanceof OpBinary && this._TAG() == o._TAG()) {
+            return Utils.compare(this.arg, ((OpBinary) o).arg);
         }
-        return this._TAG()-o._TAG();
+
+        return this._TAG() - o._TAG();
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return _TAG ^ Arrays.hashCode(this.arg);
     }
 }

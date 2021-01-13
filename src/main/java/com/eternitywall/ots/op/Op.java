@@ -4,14 +4,12 @@ import com.eternitywall.ots.StreamDeserializationContext;
 import com.eternitywall.ots.StreamSerializationContext;
 import com.eternitywall.ots.Utils;
 
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 /**
  * Operations are the edges in the timestamp tree, with each operation taking a message and zero or more arguments to produce a result.
  */
 public abstract class Op implements Comparable<Op> {
-
 
     private static Logger log = Utils.getLogger(Op.class.getName());
 
@@ -30,11 +28,10 @@ public abstract class Op implements Comparable<Op> {
      * limits required by both are quite large - 1MB and 16MiB respectively - 4KiB
      * is perfectly adequate in both cases for more reasonable usage.
      * <p>
-     * com.eternitywall.ots.op.Op subclasses should set this limit even lower if doing so is appropriate
+     * @see Op subclasses should set this limit even lower if doing so is appropriate
      * for them.
      */
     public static int _MAX_RESULT_LENGTH = 4096;
-
 
     /**
      * Maximum length of the message an com.eternitywall.ots.op.Op can be applied too.
@@ -66,6 +63,7 @@ public abstract class Op implements Comparable<Op> {
      */
     public static Op deserialize(StreamDeserializationContext ctx) {
         byte tag = ctx.readBytes(1)[0];
+
         return Op.deserializeFromTag(ctx, tag);
     }
 
@@ -91,7 +89,7 @@ public abstract class Op implements Comparable<Op> {
             return OpKECCAK256.deserializeFromTag(ctx, tag);
         } else {
             log.severe("Unknown operation tag: " + tag + " 0x" + String.format("%02x", tag));
-            return null;
+            return null;     // TODO: Is this OK? Won't it blow up later? Better to throw?
         }
     }
 
@@ -101,10 +99,11 @@ public abstract class Op implements Comparable<Op> {
      * @param ctx The stream serialization context.
      */
     public void serialize(StreamSerializationContext ctx) {
-
-        if(this._TAG()==0x00){
+        if (this._TAG() == 0x00) {
             log.severe("No valid serialized Op");
+            // TODO: Is it OK to just log and carry on? Won't it blow up later? Better to throw?
         }
+
         ctx.writeByte(this._TAG());
     }
 
@@ -119,20 +118,21 @@ public abstract class Op implements Comparable<Op> {
     public byte[] call(byte[] msg) {
         if (msg.length > _MAX_MSG_LENGTH) {
             log.severe("Error : Message too long;");
-            return new byte[]{};
+            return new byte[]{};     // TODO: Is this OK? Won't it blow up later? Better to throw?
         }
 
         byte[] r = this.call(msg);
 
         if (r.length > _MAX_RESULT_LENGTH) {
             log.severe("Error : Result too long;");
+            // TODO: Is it OK to just log and carry on? Won't it blow up later? Better to throw?
         }
+
         return r;
     }
 
     @Override
     public int compareTo(Op o) {
-        return this._TAG()-o._TAG();
+        return this._TAG() - o._TAG();
     }
-
 }

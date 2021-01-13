@@ -1,12 +1,12 @@
 package com.eternitywall.ots.op;
 
 import com.eternitywall.ots.StreamDeserializationContext;
-
-import java.util.logging.Logger;
 import com.eternitywall.ots.Utils;
 
+import java.util.logging.Logger;
+
 /**
- * Cryptographic SHA1 operation
+ * Cryptographic SHA1 operation.
  * Cryptographic operation tag numbers taken from RFC4880, although it's not
  * guaranteed that they'll continue to match that RFC in the future.
  * Remember that for timestamping, hash algorithms with collision attacks
@@ -16,7 +16,7 @@ import com.eternitywall.ots.Utils;
  * Heck, even md5 is still secure enough for timestamping... but that's
  * pushing our luck...
  *
- * @see com.eternitywall.ots.op.OpCrypto
+ * @see OpCrypto
  */
 public class OpSHA1 extends OpCrypto {
 
@@ -48,7 +48,6 @@ public class OpSHA1 extends OpCrypto {
         super();
     }
 
-
     @Override
     public byte[] call(byte[] msg) {
         return super.call(msg);
@@ -64,7 +63,7 @@ public class OpSHA1 extends OpCrypto {
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return _TAG;
     }
 }

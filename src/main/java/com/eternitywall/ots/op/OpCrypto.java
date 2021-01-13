@@ -1,5 +1,8 @@
 package com.eternitywall.ots.op;
 
+import com.eternitywall.ots.StreamDeserializationContext;
+import com.eternitywall.ots.Utils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -8,17 +11,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.Logger;
 
-import com.eternitywall.ots.StreamDeserializationContext;
-import com.eternitywall.ots.Utils;
-
-
 /**
  * Cryptographic transformations.
  * These transformations have the unique property that for any length message,
  * the size of the result they return is fixed. Additionally, they're the only
  * type of operation that can be applied directly to a stream.
  *
- * @see com.eternitywall.ots.op.OpUnary
+ * @see OpUnary
  */
 public class OpCrypto extends OpUnary {
 
@@ -48,35 +47,37 @@ public class OpCrypto extends OpUnary {
         try {
             MessageDigest digest = MessageDigest.getInstance(this._HASHLIB_NAME());
             byte[] hash = digest.digest(msg);
+
             return hash;
         } catch (NoSuchAlgorithmException e) {
             log.severe("NoSuchAlgorithmException");
             e.printStackTrace();
-            return new byte[]{};
+
+            return new byte[]{};     // TODO: Is this OK? Won't it blow up later? Better to throw?
         }
     }
 
     public byte[] hashFd(StreamDeserializationContext ctx) throws NoSuchAlgorithmException {
-            MessageDigest digest = MessageDigest.getInstance(this._HASHLIB_NAME());
-            byte[] chunk = ctx.read(1048576);
-            while (chunk != null && chunk.length > 0) {
-                digest.update(chunk);
-                chunk = ctx.read(1048576);
-            }
-            byte[] hash = digest.digest();
-            return hash;
+        MessageDigest digest = MessageDigest.getInstance(this._HASHLIB_NAME());
+        byte[] chunk = ctx.read(1048576);
+
+        while (chunk != null && chunk.length > 0) {
+            digest.update(chunk);
+            chunk = ctx.read(1048576);
+        }
+
+        byte[] hash = digest.digest();
+
+        return hash;
     }
 
     public byte[] hashFd(File file) throws IOException, NoSuchAlgorithmException {
-        byte[] result;
-        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-            result = hashFd(fileInputStream);
-        }
-        return result;
+        return hashFd(new FileInputStream(file));
     }
 
-    public byte[] hashFd(byte[] bytes) throws NoSuchAlgorithmException {
+    public byte[] hashFd(byte[] bytes) throws IOException, NoSuchAlgorithmException {
         StreamDeserializationContext ctx = new StreamDeserializationContext(bytes);
+
         return hashFd(ctx);
     }
 
@@ -84,13 +85,15 @@ public class OpCrypto extends OpUnary {
         MessageDigest digest = MessageDigest.getInstance(this._HASHLIB_NAME());
         byte[] chunk = new byte[1048576];
         int count = inputStream.read(chunk, 0, 1048576);
+
         while (count >= 0) {
-            digest.update(chunk,0,count);
+            digest.update(chunk, 0, count);
             count = inputStream.read(chunk, 0, 1048576);
         }
+
         inputStream.close();
         byte[] hash = digest.digest();
+
         return hash;
     }
-
 }

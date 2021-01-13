@@ -26,10 +26,9 @@ import java.util.logging.Logger;
  * it'd be better to have verifiers get the most recent status of such
  * information (possibly with appropriate negative response caching).
  *
- * @see com.eternitywall.ots.attestation.TimeAttestation
+ * @see TimeAttestation
  */
 public class PendingAttestation extends TimeAttestation {
-
 
     private static Logger log = Utils.getLogger(PendingAttestation.class.getName());
 
@@ -58,24 +57,32 @@ public class PendingAttestation extends TimeAttestation {
     public static boolean checkUri(byte[] uri) {
         if (uri.length > PendingAttestation._MAX_URI_LENGTH) {
             System.err.print("URI exceeds maximum length");
+
             return false;
         }
+
         for (int i = 0; i < uri.length; i++) {
             Character c = String.format("%c", uri[i]).charAt(0);
+
             if (PendingAttestation._ALLOWED_URI_CHARS.indexOf(c) < 0) {
                 log.severe("URI contains invalid character ");
+
                 return false;
             }
         }
+
         return true;
     }
 
     public static PendingAttestation deserialize(StreamDeserializationContext ctxPayload) {
         byte[] utf8Uri = ctxPayload.readVarbytes(PendingAttestation._MAX_URI_LENGTH);
+
         if (PendingAttestation.checkUri(utf8Uri) == false) {
             log.severe("Invalid URI: ");
+
             return null;
         }
+
         return new PendingAttestation(utf8Uri);
     }
 
@@ -91,25 +98,29 @@ public class PendingAttestation extends TimeAttestation {
     @Override
     public int compareTo(TimeAttestation o) {
         PendingAttestation opa = (PendingAttestation) o;
-        return Utils.compare(this.uri, opa.uri) ;
+
+        return Utils.compare(this.uri, opa.uri);
     }
 
     @Override
-    public boolean equals(Object obj){
-        if(!(obj instanceof PendingAttestation)){
+    public boolean equals(Object obj) {
+        if (!(obj instanceof PendingAttestation)) {
             return false;
         }
-        if(!Arrays.equals(this._TAG(), ((PendingAttestation)obj)._TAG())){
+
+        if (!Arrays.equals(this._TAG(), ((PendingAttestation) obj)._TAG())) {
             return false;
         }
-        if(!Arrays.equals(this.uri, ((PendingAttestation)obj).uri)){
+
+        if (!Arrays.equals(this.uri, ((PendingAttestation) obj).uri)) {
             return false;
         }
+
         return true;
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return Arrays.hashCode(this._TAG()) ^ Arrays.hashCode(this.uri);
     }
 }
